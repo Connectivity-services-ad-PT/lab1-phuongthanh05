@@ -4,12 +4,13 @@ Thư mục này dùng để nộp minh chứng thiết lập môi trường lab.
 
 ## Sinh viên điền thông tin
 
-- Họ tên:
-- Mã sinh viên:
-- Nhóm:
-- Vai trò dự kiến trong nhóm:
-- Hệ điều hành:
-- Ghi chú:
+- Họ tên: Hà Thị Phương Thanh
+- Mã sinh viên: 1771020626
+- Nhóm: 3B
+- Vai trò dự kiến trong nhóm: Phát triển và quản lý IoT Service (thu thập, xử lý dữ liệu từ thiết bị IoT)
+- Hệ điều hành: WIN
+- Ghi chú: Nhóm phụ trách xây dựng hệ thống quản lý thông minh với trọng tâm IoT. Đã hoàn thành thiết lập môi trường lab và thu thập minh chứng.
+
 
 ## Các file minh chứng nên có
 

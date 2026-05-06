@@ -99,6 +99,7 @@ Frontend → hiển thị dữ liệu
 Dashboard Service → thống kê
 AI Service → lấy dữ liệu
 ## 8. Sơ đồ minh họa
+https://lucid.app/lucidchart/3ebb9a7f-307a-4b4d-af3f-fe2e5d2b4d0c/edit?viewport_loc=-1927%2C-3137%2C6101%2C3148%2C0_0&invitationId=inv_262a62b8-afc2-40f3-bf83-d62dc5eb2249
 
 Có thể vẽ bằng Mermaid, draw.io, Ludichart hoặc ảnh chụp sơ đồ.
 
