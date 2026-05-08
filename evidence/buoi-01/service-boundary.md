@@ -98,13 +98,55 @@ Service gọi đến IoT Service:
 Frontend → hiển thị dữ liệu
 Dashboard Service → thống kê
 AI Service → lấy dữ liệu
-## 8. Sơ đồ minh họa
-https://lucid.app/lucidchart/3ebb9a7f-307a-4b4d-af3f-fe2e5d2b4d0c/edit?viewport_loc=-1927%2C-3137%2C6101%2C3148%2C0_0&invitationId=inv_262a62b8-afc2-40f3-bf83-d62dc5eb2249
 
-Có thể vẽ bằng Mermaid, draw.io, Ludichart hoặc ảnh chụp sơ đồ.
+## 8. Sơ đồ Service Boundary Diagram
 
 ```mermaid
-flowchart LR
-    User[Actor] --> Service[Service của nhóm]
-    Service --> DB[(Database)]
-    Service --> Other[Service khác]
+graph TD
+    subgraph Actors["Actors (Đối tượng tương tác)"]
+        J["👤 User<br/>(Xem dữ liệu)"]
+        K["👨‍💼 Admin<br/>(Quản lý thiết bị)"]
+        L["📱 IoT Device<br/>(Gửi dữ liệu)"]
+        M["🔗 Service khác<br/>(Frontend/AI/Dashboard)"]
+    end
+    
+    subgraph Boundary["🔷 IoT Service Boundary (Nhóm kiểm soát)"]
+        A["1️⃣ Nhận dữ liệu từ IoT Device"]
+        B["2️⃣ Xử lý dữ liệu<br/>(kiểm tra, chuẩn hóa)"]
+        C["3️⃣ Lưu trữ dữ liệu<br/>vào Database"]
+        D["4️⃣ Cung cấp API<br/>truy vấn dữ liệu"]
+        E["5️⃣ Theo dõi<br/>trạng thái thiết bị"]
+    end
+    
+    subgraph Integration["🟨 Dịch vụ tích hợp (Nhóm chỉ tích hợp)"]
+        F["🖥️ Frontend<br/>(Web/App)"]
+        G["🔐 Auth Service<br/>(Đăng nhập)"]
+        H["🤖 AI Service<br/>(Phân tích dữ liệu)"]
+        I["🔔 Notification Service<br/>(Gửi cảnh báo)"]
+    end
+    
+    L --> A
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    J --> D
+    K --> D
+    M --> D
+    D --> F
+    D --> G
+    D --> H
+    D --> I
+    
+    style Boundary fill:#87CEEB,stroke:#0066cc,stroke-width:3px,color:#000
+    style Integration fill:#FFD700,stroke:#ff9900,stroke-width:2px,color:#000
+    style Actors fill:#D3D3D3,stroke:#666,stroke-width:2px,color:#000
+```
+
+**Giải thích biểu đồ:**
+- **Actors (xám)**: Các đối tượng tương tác với hệ thống từ bên ngoài.
+- **IoT Service Boundary (xanh)**: Phần mà nhóm kiểm soát và xây dựng, bao gồm 5 bước xử lý dữ liệu.
+- **Dịch vụ tích hợp (vàng)**: Các service bên ngoài mà nhóm tích hợp nhưng không tự xây dựng.
+- **Luồng dữ liệu**: Mũi tên thể hiện hướng truyền dữ liệu từ IoT Device → xử lý → lưu trữ → cung cấp API → các service khác.
+
+**Link Lucidchart**: https://lucid.app/lucidchart/3ebb9a7f-307a-4b4d-af3f-fe2e5d2b4d0c
