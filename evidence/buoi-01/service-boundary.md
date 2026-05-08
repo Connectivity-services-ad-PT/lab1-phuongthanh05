@@ -105,6 +105,32 @@ Có thể vẽ bằng Mermaid, draw.io, Ludichart hoặc ảnh chụp sơ đồ.
 
 ```mermaid
 flowchart LR
-    User[Actor] --> Service[Service của nhóm]
-    Service --> DB[(Database)]
-    Service --> Other[Service khác]
+  Create a Service Boundary Diagram for an IoT system project. 
+
+Actors (external entities interacting with the system):
+- User: Views data from devices (temperature, humidity, status, etc.)
+- Admin: Manages devices, configures the system
+- IoT Device: Sends sensor data to the system
+- Other Services (Frontend/AI/Dashboard): Calls API to retrieve data
+
+Service Boundary (what the IoT service controls and builds):
+- Receives data from IoT Device
+- Processes data (validates, normalizes)
+- Stores data in Database
+- Provides API for querying data
+- Monitors device status
+
+Integrated Services (what the team only integrates, not builds):
+- Frontend (Web/App)
+- Auth Service (login)
+- AI Service (data analysis)
+- Notification Service (sends alerts)
+
+Diagram structure:
+- Use rectangles for boundaries and services.
+- Use ovals or circles for actors.
+- Show data flow with arrows: IoT Device → Receive Data → Process → Store → Provide API → Monitor.
+- Connect actors to Provide API with arrows.
+- Connect Provide API to each integrated service with arrows.
+- Label clearly in Vietnamese or English.
+- Style: Clean, with colors (e.g., blue for boundary, yellow for integrated services, gray for actors).
