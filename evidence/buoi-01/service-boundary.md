@@ -98,48 +98,13 @@ Service gọi đến IoT Service:
 Frontend → hiển thị dữ liệu
 Dashboard Service → thống kê
 AI Service → lấy dữ liệu
+## 8. Sơ đồ minh họa
+https://lucid.app/lucidchart/3ebb9a7f-307a-4b4d-af3f-fe2e5d2b4d0c/edit?viewport_loc=-1927%2C-3137%2C6101%2C3148%2C0_0&invitationId=inv_262a62b8-afc2-40f3-bf83-d62dc5eb2249
 
-## 8. Biểu đồ Service Boundary
-
-Dưới đây là biểu đồ minh họa Service Boundary của nhóm cho đề tài IoT:
+Có thể vẽ bằng Mermaid, draw.io, Ludichart hoặc ảnh chụp sơ đồ.
 
 ```mermaid
-graph TD
-    subgraph "IoT Service Boundary (Nhóm kiểm soát)"
-        A[Nhận dữ liệu từ IoT Device]
-        B[Xử lý dữ liệu (kiểm tra, chuẩn hóa)]
-        C[Lưu trữ dữ liệu vào Database]
-        D[Cung cấp API truy vấn dữ liệu]
-        E[Theo dõi trạng thái thiết bị]
-    end
-    subgraph "Dịch vụ tích hợp (Nhóm chỉ tích hợp)"
-        F[Frontend (Web/App)]
-        G[Auth Service (đăng nhập)]
-        H[AI Service (phân tích dữ liệu)]
-        I[Notification Service (gửi cảnh báo)]
-    end
-    subgraph "Actors (Đối tượng tương tác)"
-        J[User (Người dùng): xem dữ liệu]
-        K[Admin: quản lý thiết bị, cấu hình]
-        L[IoT Device: gửi dữ liệu sensor]
-        M[Service khác (Frontend/AI/Dashboard): gọi API]
-    end
-    L --> A
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    J --> D
-    K --> D
-    M --> D
-    D --> F
-    D --> G
-    D --> H
-    D --> I
-```
-
-**Giải thích biểu đồ:**
-- **IoT Service Boundary**: Phần mà nhóm kiểm soát và xây dựng, bao gồm quy trình xử lý dữ liệu từ thiết bị IoT.
-- **Dịch vụ tích hợp**: Các dịch vụ bên ngoài mà nhóm chỉ tích hợp (không tự xây dựng).
-- **Actors**: Các đối tượng tương tác với hệ thống.
-- **Luồng tương tác**: Mũi tên cho thấy luồng dữ liệu và tương tác giữa các phần.
+flowchart LR
+    User[Actor] --> Service[Service của nhóm]
+    Service --> DB[(Database)]
+    Service --> Other[Service khác]
