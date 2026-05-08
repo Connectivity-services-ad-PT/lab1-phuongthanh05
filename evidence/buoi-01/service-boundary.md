@@ -98,39 +98,48 @@ Service gọi đến IoT Service:
 Frontend → hiển thị dữ liệu
 Dashboard Service → thống kê
 AI Service → lấy dữ liệu
-## 8. Sơ đồ minh họa
-https://lucid.app/lucidchart/3ebb9a7f-307a-4b4d-af3f-fe2e5d2b4d0c/edit?viewport_loc=-1927%2C-3137%2C6101%2C3148%2C0_0&invitationId=inv_262a62b8-afc2-40f3-bf83-d62dc5eb2249
 
-Có thể vẽ bằng Mermaid, draw.io, Ludichart hoặc ảnh chụp sơ đồ.
+## 8. Biểu đồ Service Boundary
+
+Dưới đây là biểu đồ minh họa Service Boundary của nhóm cho đề tài IoT:
 
 ```mermaid
-flowchart LR
-  Create a Service Boundary Diagram for an IoT system project. 
+graph TD
+    subgraph "IoT Service Boundary (Nhóm kiểm soát)"
+        A[Nhận dữ liệu từ IoT Device]
+        B[Xử lý dữ liệu (kiểm tra, chuẩn hóa)]
+        C[Lưu trữ dữ liệu vào Database]
+        D[Cung cấp API truy vấn dữ liệu]
+        E[Theo dõi trạng thái thiết bị]
+    end
+    subgraph "Dịch vụ tích hợp (Nhóm chỉ tích hợp)"
+        F[Frontend (Web/App)]
+        G[Auth Service (đăng nhập)]
+        H[AI Service (phân tích dữ liệu)]
+        I[Notification Service (gửi cảnh báo)]
+    end
+    subgraph "Actors (Đối tượng tương tác)"
+        J[User (Người dùng): xem dữ liệu]
+        K[Admin: quản lý thiết bị, cấu hình]
+        L[IoT Device: gửi dữ liệu sensor]
+        M[Service khác (Frontend/AI/Dashboard): gọi API]
+    end
+    L --> A
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    J --> D
+    K --> D
+    M --> D
+    D --> F
+    D --> G
+    D --> H
+    D --> I
+```
 
-Actors (external entities interacting with the system):
-- User: Views data from devices (temperature, humidity, status, etc.)
-- Admin: Manages devices, configures the system
-- IoT Device: Sends sensor data to the system
-- Other Services (Frontend/AI/Dashboard): Calls API to retrieve data
-
-Service Boundary (what the IoT service controls and builds):
-- Receives data from IoT Device
-- Processes data (validates, normalizes)
-- Stores data in Database
-- Provides API for querying data
-- Monitors device status
-
-Integrated Services (what the team only integrates, not builds):
-- Frontend (Web/App)
-- Auth Service (login)
-- AI Service (data analysis)
-- Notification Service (sends alerts)
-
-Diagram structure:
-- Use rectangles for boundaries and services.
-- Use ovals or circles for actors.
-- Show data flow with arrows: IoT Device → Receive Data → Process → Store → Provide API → Monitor.
-- Connect actors to Provide API with arrows.
-- Connect Provide API to each integrated service with arrows.
-- Label clearly in Vietnamese or English.
-- Style: Clean, with colors (e.g., blue for boundary, yellow for integrated services, gray for actors).
+**Giải thích biểu đồ:**
+- **IoT Service Boundary**: Phần mà nhóm kiểm soát và xây dựng, bao gồm quy trình xử lý dữ liệu từ thiết bị IoT.
+- **Dịch vụ tích hợp**: Các dịch vụ bên ngoài mà nhóm chỉ tích hợp (không tự xây dựng).
+- **Actors**: Các đối tượng tương tác với hệ thống.
+- **Luồng tương tác**: Mũi tên cho thấy luồng dữ liệu và tương tác giữa các phần.
