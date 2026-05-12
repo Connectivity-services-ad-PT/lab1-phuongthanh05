@@ -114,93 +114,97 @@ Các thành phần nền tảng hỗ trợ dịch vụ:
 
 ```mermaid
 graph LR
-    A[Actor] --> B[Boundary]
-    B --> C[Service]
-    C --> D[Platform]
+    classDef actorFill fill:#F5F5F5,stroke:#333,stroke-width:1px;
+    classDef boundaryFill fill:#E8F2FF,stroke:#1E90FF,stroke-width:2px;
+    classDef serviceFill fill:#D9EAD3,stroke:#2E8B57,stroke-width:2px;
+    classDef platformFill fill:#F3E2A9,stroke:#CC7A00,stroke-width:2px;
 
-    subgraph Actor[ACTOR]
+    subgraph ACTOR[ACTOR]
         U["Người dùng"]
-        I["Thiết bị IoT"]
-        S["Service khác (Frontend/AI/Dashboard)"]
+        D["Thiết bị IoT\n(Sensors, mobile devices)"]
+        T["Dữ liệu IoT\n(Nhiệt độ, độ ẩm, camera)"]
+        A["Thiết bị / Actuator"]
     end
 
-    subgraph Boundary[BOUNDARY]
-        Ingest["Dịch vụ Tiếp nhận (Ingestion Service)"]
-        Auth["Dịch vụ Xác thực & Phân quyền (nếu cần)"]
-        Validate["Dịch vụ Kiểm tra & Chuẩn hóa"]
-        Process["Dịch vụ Xử lý thời gian thực"]
-        Store["Lưu trữ dữ liệu vào DB"]
+    subgraph BOUNDARY[BOUNDARY]
+        Ingest["Dịch vụ Tiếp nhận\n(Ingestion Service)\n- MQTT / CoAP / HTTP\n- Chia luồng dữ liệu\n- Đẩy vào Queue"]
+        Auth["Dịch vụ Xác thực & Phân quyền\n(mTLS / OAuth2)"]
+        Validate["Dịch vụ Kiểm tra & Chuẩn hóa\n(schema validation)"]
+        Process["Dịch vụ Xử lý Thời gian Thực\nRule engine / stream processing"]
     end
 
-    subgraph Service[SERVICE]
+    subgraph SERVICE[SERVICE]
         APIGW["API Gateway"]
-        Core["Dịch vụ Quản lý Thiết bị"]
-        Notify["Notification / Cảnh báo"]
-        Rule["Rule Engine / Quản lý quy tắc"]
-        Report["Dashboard / Báo cáo"]
+        DeviceMgmt["Dịch vụ Quản lý Thiết bị\n(Core IoT)"]
+        Notify["Dịch vụ Thông báo & Cảnh báo"]
+        RuleEngine["Dịch vụ Quản lý Quy tắc\n(Rule Engine Manager)"]
+        Dashboard["Dịch vụ Dashboard & Báo cáo\n(Analytics, statistics)"]
     end
 
-    subgraph Platform[PLATFORM]
+    subgraph PLATFORM[PLATFORM]
         Container["Container"]
         Compute["Compute"]
         TSDB["Time-series DB"]
         Storage["Object Storage"]
         MQ["Message Queue"]
-        OAuth["OAuth2 / Auth Service"]
+        OAuth2["OAuth2"]
         Monitor["Monitoring"]
     end
 
     U --> Ingest
-    I --> Ingest
-    S --> APIGW
-    Ingest --> Validate
-    Validate --> Store
-    Store --> APIGW
-    APIGW --> Core
+    D --> Ingest
+    T --> Ingest
+    A --> Ingest
+    Ingest --> Auth
+    Auth --> Validate
+    Validate --> Process
+    Process --> DeviceMgmt
+    Process --> RuleEngine
+    Process --> Notify
+    Process --> Dashboard
+    DeviceMgmt --> APIGW
+    APIGW --> Dashboard
     APIGW --> Notify
-    APIGW --> Rule
-    APIGW --> Report
-    Core --> TSDB
+    APIGW --> RuleEngine
+    DeviceMgmt --> TSDB
     Notify --> MQ
-    Report --> Storage
+    Dashboard --> Storage
     APIGW --> Container
     Container --> Compute
     Compute --> TSDB
     Compute --> Storage
     Compute --> MQ
     Compute --> Monitor
+
+    class U,D,T,A actorFill;
+    class Ingest,Auth,Validate,Process boundaryFill;
+    class APIGW,DeviceMgmt,Notify,RuleEngine,Dashboard serviceFill;
+    class Container,Compute,TSDB,Storage,MQ,OAuth2,Monitor platformFill;
 ```
 
 ### Ghi chú
 
-- `ACTOR` là các thành phần bên ngoài hệ thống: người dùng, thiết bị IoT và hệ thống khác.
-- `BOUNDARY` là phạm vi nhóm xây dựng, bao gồm toàn bộ luồng tiếp nhận, kiểm tra, chuẩn hóa, xử lý và lưu trữ dữ liệu.
-- `SERVICE` là các chức năng nội bộ cung cấp API, quản lý thiết bị, cảnh báo và báo cáo.
-- `PLATFORM` là môi trường triển khai và hạ tầng hỗ trợ dịch vụ.
-- Mũi tên thể hiện luồng dữ liệu chính: từ thiết bị IoT vào dịch vụ, sau đó dịch vụ cung cấp dữ liệu cho hệ thống khác.
-- Phần `Auth` chỉ là thành phần tham chiếu nếu cần tích hợp xác thực bên ngoài; service chính vẫn tập trung vào xử lý IoT.
+- `ACTOR` là các thực thể bên ngoài: Người dùng, Thiết bị IoT, Dữ liệu IoT, Thiết bị/Actuator.
+- `BOUNDARY` là vùng nhóm kiểm soát, gồm các service nhận, xác thực, kiểm tra và xử lý dữ liệu.
+- `SERVICE` là các thành phần chức năng cốt lõi: API Gateway, quản lý thiết bị, cảnh báo, rule engine, dashboard.
+- `PLATFORM` là hạ tầng triển khai: container, compute, database, storage, queue, auth và monitoring.
+- Mũi tên từ `Actor` vào `Boundary` thể hiện luồng dữ liệu và yêu cầu đến hệ thống.
+- Mũi tên từ `Boundary` sang `Service` thể hiện luồng xử lý nội bộ và phân phối dữ liệu.
+- Mũi tên từ `Service` sang `Platform` thể hiện phụ thuộc hạ tầng.
 
 ### Giải thích sơ đồ
 
-- `ACTOR`: Người dùng, thiết bị IoT, hệ thống khác tương tác với dịch vụ.
-- `BOUNDARY`: Phần nhóm xây dựng, gồm nhận dữ liệu, kiểm tra, xử lý, lưu trữ.
-- `SERVICE`: Các chức năng nội bộ như API, quản lý thiết bị, cảnh báo, dashboard.
-- `PLATFORM`: Cơ sở hạ tầng hỗ trợ như container, database, queue, monitoring.
-- Dòng `I --> Ingest` cho thấy thiết bị IoT gửi dữ liệu vào dịch vụ nhận.
-- Dòng `Ingest --> Validate` cho thấy dữ liệu được kiểm tra/chuẩn hóa trước khi lưu.
-- Dòng `Validate --> Store` cho thấy bước kiểm tra dữ liệu là cần thiết để tránh lưu dữ liệu không đúng định dạng.
-- Dòng `Store --> APIGW` và `APIGW --> Core` cho thấy dữ liệu sau khi lưu có thể được truy vấn qua API.
-- Dòng `APIGW --> Notify` và `APIGW --> Rule` cho thấy API cũng có thể kích hoạt cảnh báo hoặc quy tắc tự động.
-- Dòng `APIGW --> Report` cho thấy dịch vụ dashboard/báo cáo sử dụng cùng dữ liệu đã lưu.
-
-### Ghi chú bổ sung
-
-- `Actor` gồm cả thiết bị IoT và người dùng, nhưng thiết bị IoT mới là nguồn dữ liệu chính.
-- `Boundary` là phần nhóm xây dựng, nơi dịch vụ nhận và xử lý dữ liệu. Đây là phạm vi chính của đề tài.
-- `Service` gồm các chức năng điều phối, cung cấp API và hỗ trợ các luồng nghiệp vụ như cảnh báo và báo cáo.
-- `Platform` chỉ là hạ tầng hỗ trợ, không phải phần nhóm cần thiết kế chức năng nghiệp vụ.
-- Mục tiêu chính của đề tài: xây dựng `IoT Ingestion Service`, còn `Auth Service`, `Notification Service` và `AI Service` là các tích hợp bên ngoài.
+- `Dịch vụ Tiếp nhận` nhận dữ liệu từ thiết bị IoT và các nguồn dữ liệu bên ngoài.
+- `Dịch vụ Xác thực & Phân quyền` đảm bảo dịch vụ chỉ xử lý request hợp lệ.
+- `Dịch vụ Kiểm tra & Chuẩn hóa` xử lý việc validate schema và chuyển đổi dữ liệu.
+- `Dịch vụ Xử lý Thời gian Thực` thực hiện rule engine và xử lý stream.
+- `API Gateway` định tuyến request tới các dịch vụ nội bộ và cung cấp endpoint cho front-end.
+- `Dịch vụ Quản lý Thiết bị` lưu trữ metadata thiết bị và cung cấp thông tin thiết bị.
+- `Dịch vụ Thông báo & Cảnh báo` gửi cảnh báo khi dữ liệu vượt ngưỡng.
+- `Dịch vụ Quản lý Quy tắc` chứa các rule và điều kiện xử lý dữ liệu.
+- `Dịch vụ Dashboard & Báo cáo` hiển thị dữ liệu, thống kê và báo cáo.
+- `Platform` là cơ sở hạ tầng: compute, database, storage, queue, auth, monitoring.
 
 ---
 
-> Lưu ý: Đây là biểu đồ tổng quan dựa trên đề tài xây dựng dịch vụ tiếp nhận dữ liệu IoT. Nhóm phát triển chính phần `BOUNDARY` và `SERVICE`, còn `PLATFORM` là cơ sở hạ tầng triển khai.
+> Lưu ý: Sơ đồ này mô phỏng cấu trúc hình bạn gửi, với 4 cột `ACTOR`, `BOUNDARY`, `SERVICE`, `PLATFORM` và các luồng dữ liệu.
