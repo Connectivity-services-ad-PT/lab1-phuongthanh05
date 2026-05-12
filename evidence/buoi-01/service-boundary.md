@@ -110,101 +110,152 @@ Các thành phần nền tảng hỗ trợ dịch vụ:
 - Kết quả health check
 - API response chứa trạng thái thành công / lỗi
 
-## 8. Sơ đồ tổng quan
+## 8. Sơ đồ Service Boundary Diagram
+
+### Cấu trúc chi tiết
+
+**ACTOR (Bên ngoài/Thực thể tương tác):**
+- 👤 **Người dùng**: Xem dữ liệu, theo dõi trạng thái
+- 📱 **Thiết bị IoT**:
+  - Sensors (cảm biến nhiệt độ, độ ẩm)
+  - Mobile devices (điện thoại, tablet)
+- 📊 **Dữ liệu IoT**:
+  - Nhiệt độ
+  - Độ ẩm
+  - Camera, GPS Tracker
+- 🛠️ **Thiết bị/Actuator**: Điều khiển từ hệ thống
+
+**BOUNDARY (Ranh giới / Phần nhóm xây dựng):**
+- 📥 **Dịch vụ Tiếp nhận (Ingestion Service)**
+  - Nhận dữ liệu từ MQTT/CoAP/HTTP
+  - Chia luồng dữ liệu
+  - Đẩy vào Queue
+- 🔐 **Dịch vụ Xác thực & Phân quyền**
+  - mTLS
+  - OAuth2/Phân quyền truy cập
+- ✓ **Dịch vụ Kiểm tra & Chuẩn hóa**
+  - Schema validation
+  - Chuẩn hóa giá trị
+- ⚙️ **Dịch vụ Xử lý Thời gian Thực**
+  - Rule engine
+  - Stream processing
+
+**SERVICE (Hệ thống / Hệ thống Tiếp nhận dữ liệu IoT):**
+- 🌐 **API Gateway**: Định tuyến request
+- 💾 **Dịch vụ Quản lý Thiết bị (Device Management)**
+- 🔔 **Dịch vụ Thông báo & Cảnh báo**
+- ⚡ **Dịch vụ Quản lý Quy tắc (Rule Engine Manager)**
+- 📊 **Dịch vụ Dashboard & Báo cáo (Analytics)**
+
+**PLATFORM (Nền tảng / Hạ tầng):**
+- 📦 **Container**: Docker/Kubernetes
+- 🖥️ **Compute**: Server, VM
+- 📈 **Time-series DB**: InfluxDB, Prometheus
+- 💾 **Object Storage**: S3, Cloud Storage
+- 🚀 **Message Queue**: RabbitMQ, Kafka
+- 🔑 **OAuth2**: Xác thực
+- 📡 **Monitoring**: Logging, Metrics
+
+### Sơ đồ Mermaid
 
 ```mermaid
 graph LR
-    classDef actorFill fill:#F5F5F5,stroke:#333,stroke-width:1px;
-    classDef boundaryFill fill:#E8F2FF,stroke:#1E90FF,stroke-width:2px;
-    classDef serviceFill fill:#D9EAD3,stroke:#2E8B57,stroke-width:2px;
-    classDef platformFill fill:#F3E2A9,stroke:#CC7A00,stroke-width:2px;
+    classDef actor fill:#F5F5F5,stroke:#666,stroke-width:2px,color:#000;
+    classDef boundary fill:#E3F2FD,stroke:#1E88E5,stroke-width:2px,color:#000;
+    classDef service fill:#E8F5E9,stroke:#43A047,stroke-width:2px,color:#000;
+    classDef platform fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px,color:#000;
 
-    subgraph ACTOR[ACTOR]
-        U["Người dùng"]
-        D["Thiết bị IoT\n(Sensors, mobile devices)"]
-        T["Dữ liệu IoT\n(Nhiệt độ, độ ẩm, camera)"]
-        A["Thiết bị / Actuator"]
+    subgraph ACTOR["👥 ACTOR (Bên ngoài)"]
+        A1["👤 Người dùng"]
+        A2["📱 Thiết bị IoT<br/>(Sensors, Mobile)"]
+        A3["📊 Dữ liệu IoT<br/>(Nhiệt độ, độ ẩm)"]
+        A4["🛠️ Thiết bị/Actuator"]
     end
 
-    subgraph BOUNDARY[BOUNDARY]
-        Ingest["Dịch vụ Tiếp nhận\n(Ingestion Service)\n- MQTT / CoAP / HTTP\n- Chia luồng dữ liệu\n- Đẩy vào Queue"]
-        Auth["Dịch vụ Xác thực & Phân quyền\n(mTLS / OAuth2)"]
-        Validate["Dịch vụ Kiểm tra & Chuẩn hóa\n(schema validation)"]
-        Process["Dịch vụ Xử lý Thời gian Thực\nRule engine / stream processing"]
+    subgraph BOUNDARY["🔷 BOUNDARY (Ranh giới hệ thống)"]
+        B1["📥 Dịch vụ Tiếp nhận<br/>(Ingestion Service)<br/>- MQTT/CoAP/HTTP<br/>- Chia luồng dữ liệu<br/>- Queue"]
+        B2["🔐 Dịch vụ Xác thực<br/>& Phân quyền<br/>- mTLS<br/>- OAuth2"]
+        B3["✓ Dịch vụ Kiểm tra<br/>& Chuẩn hóa<br/>- Schema validation"]
+        B4["⚙️ Dịch vụ Xử lý<br/>Thời gian Thực<br/>- Rule engine"]
     end
 
-    subgraph SERVICE[SERVICE]
-        APIGW["API Gateway"]
-        DeviceMgmt["Dịch vụ Quản lý Thiết bị\n(Core IoT)"]
-        Notify["Dịch vụ Thông báo & Cảnh báo"]
-        RuleEngine["Dịch vụ Quản lý Quy tắc\n(Rule Engine Manager)"]
-        Dashboard["Dịch vụ Dashboard & Báo cáo\n(Analytics, statistics)"]
+    subgraph SERVICE["🟦 SERVICE (Hệ thống)"]
+        S1["🌐 API Gateway"]
+        S2["💾 Dịch vụ Quản lý<br/>Thiết bị"]
+        S3["🔔 Dịch vụ Thông báo<br/>& Cảnh báo"]
+        S4["⚡ Dịch vụ Quản lý<br/>Quy tắc"]
+        S5["📊 Dịch vụ Dashboard<br/>& Báo cáo"]
     end
 
-    subgraph PLATFORM[PLATFORM]
-        Container["Container"]
-        Compute["Compute"]
-        TSDB["Time-series DB"]
-        Storage["Object Storage"]
-        MQ["Message Queue"]
-        OAuth2["OAuth2"]
-        Monitor["Monitoring"]
+    subgraph PLATFORM["🟨 PLATFORM (Hạ tầng)"]
+        P1["📦 Container"]
+        P2["🖥️ Compute"]
+        P3["📈 Time-series DB"]
+        P4["💾 Object Storage"]
+        P5["🚀 Message Queue"]
+        P6["🔑 OAuth2"]
+        P7["📡 Monitoring"]
     end
 
-    U --> Ingest
-    D --> Ingest
-    T --> Ingest
-    A --> Ingest
-    Ingest --> Auth
-    Auth --> Validate
-    Validate --> Process
-    Process --> DeviceMgmt
-    Process --> RuleEngine
-    Process --> Notify
-    Process --> Dashboard
-    DeviceMgmt --> APIGW
-    APIGW --> Dashboard
-    APIGW --> Notify
-    APIGW --> RuleEngine
-    DeviceMgmt --> TSDB
-    Notify --> MQ
-    Dashboard --> Storage
-    APIGW --> Container
-    Container --> Compute
-    Compute --> TSDB
-    Compute --> Storage
-    Compute --> MQ
-    Compute --> Monitor
+    A1 --> B1
+    A2 --> B1
+    A3 --> B1
+    A4 --> B1
 
-    class U,D,T,A actorFill;
-    class Ingest,Auth,Validate,Process boundaryFill;
-    class APIGW,DeviceMgmt,Notify,RuleEngine,Dashboard serviceFill;
-    class Container,Compute,TSDB,Storage,MQ,OAuth2,Monitor platformFill;
+    B1 --> B2
+    B2 --> B3
+    B3 --> B4
+    B4 --> S1
+
+    S1 --> S2
+    S1 --> S3
+    S1 --> S4
+    S1 --> S5
+
+    S2 --> P3
+    S3 --> P5
+    S4 --> P3
+    S5 --> P4
+
+    S1 --> P1
+    P1 --> P2
+    P2 --> P3
+    P2 --> P5
+    P2 --> P7
+
+    class A1,A2,A3,A4 actor;
+    class B1,B2,B3,B4 boundary;
+    class S1,S2,S3,S4,S5 service;
+    class P1,P2,P3,P4,P5,P6,P7 platform;
 ```
 
-### Ghi chú
+### Ghi chú & Giải thích
 
-- `ACTOR` là các thực thể bên ngoài: Người dùng, Thiết bị IoT, Dữ liệu IoT, Thiết bị/Actuator.
-- `BOUNDARY` là vùng nhóm kiểm soát, gồm các service nhận, xác thực, kiểm tra và xử lý dữ liệu.
-- `SERVICE` là các thành phần chức năng cốt lõi: API Gateway, quản lý thiết bị, cảnh báo, rule engine, dashboard.
-- `PLATFORM` là hạ tầng triển khai: container, compute, database, storage, queue, auth và monitoring.
-- Mũi tên từ `Actor` vào `Boundary` thể hiện luồng dữ liệu và yêu cầu đến hệ thống.
-- Mũi tên từ `Boundary` sang `Service` thể hiện luồng xử lý nội bộ và phân phối dữ liệu.
-- Mũi tên từ `Service` sang `Platform` thể hiện phụ thuộc hạ tầng.
+**Cột ACTOR:**
+- Các thực thể bên ngoài tương tác với hệ thống
+- Bao gồm người dùng, thiết bị IoT, dữ liệu sensor, và thiết bị điều khiển
 
-### Giải thích sơ đồ
+**Cột BOUNDARY (Ranh giới hệ thống):**
+- Phạm vi nhóm xây dựng và quản lý
+- Bao gồm dịch vụ tiếp nhận, xác thực, kiểm tra, và xử lý thời gian thực
+- Đây là "lõi" chính của đề tài
 
-- `Dịch vụ Tiếp nhận` nhận dữ liệu từ thiết bị IoT và các nguồn dữ liệu bên ngoài.
-- `Dịch vụ Xác thực & Phân quyền` đảm bảo dịch vụ chỉ xử lý request hợp lệ.
-- `Dịch vụ Kiểm tra & Chuẩn hóa` xử lý việc validate schema và chuyển đổi dữ liệu.
-- `Dịch vụ Xử lý Thời gian Thực` thực hiện rule engine và xử lý stream.
-- `API Gateway` định tuyến request tới các dịch vụ nội bộ và cung cấp endpoint cho front-end.
-- `Dịch vụ Quản lý Thiết bị` lưu trữ metadata thiết bị và cung cấp thông tin thiết bị.
-- `Dịch vụ Thông báo & Cảnh báo` gửi cảnh báo khi dữ liệu vượt ngưỡng.
-- `Dịch vụ Quản lý Quy tắc` chứa các rule và điều kiện xử lý dữ liệu.
-- `Dịch vụ Dashboard & Báo cáo` hiển thị dữ liệu, thống kê và báo cáo.
-- `Platform` là cơ sở hạ tầng: compute, database, storage, queue, auth, monitoring.
+**Cột SERVICE (Hệ thống tiếp nhận dữ liệu IoT):**
+- Các chức năng nội bộ cung cấp giá trị cho người dùng
+- API Gateway là điểm vào duy nhất
+- Cung cấp các dịch vụ quản lý thiết bị, cảnh báo, rule engine, và dashboard
+
+**Cột PLATFORM (Hạ tầng):**
+- Môi trường triển khai và công nghệ hỗ trợ
+- Container để đóng gói, compute để chạy, database để lưu trữ
+- Message Queue để xử lý luồng dữ liệu bất đồng bộ
+- Monitoring để theo dõi hệ thống
+
+**Luồng dữ liệu chính:**
+- Actor → Boundary: Dữ liệu từ thiết bị vào hệ thống
+- Boundary → Service: Dữ liệu được xử lý và phân phối
+- Service → Platform: Lưu trữ và triển khai
 
 ---
 
-> Lưu ý: Sơ đồ này mô phỏng cấu trúc hình bạn gửi, với 4 cột `ACTOR`, `BOUNDARY`, `SERVICE`, `PLATFORM` và các luồng dữ liệu.
+> **Lưu ý:** Biểu đồ này định nghĩa rõ ranh giới hệ thống IoT Service theo kiểu `ACTOR | BOUNDARY | SERVICE | PLATFORM`. Phạm vi chính của nhóm là `BOUNDARY` (xây dựng từ đầu) và `SERVICE` (các chức năng cơ bản), trong khi `PLATFORM` là hạ tầng hỗ trợ.
